@@ -1,3 +1,0 @@
-[submodule "common"]
-	path = common
-	url = git@bitbucket.org:traxiondev/commons-php.git
