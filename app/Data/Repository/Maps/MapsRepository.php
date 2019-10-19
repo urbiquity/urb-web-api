@@ -36,8 +36,8 @@ class MapsRepository extends BaseRepository
             }
         }
 
-        foreach($this->map->getFillable() as $column){
-            if(!isset($data[$column])){
+        foreach( $this->map->getFillable() as $column ){
+            if( !isset( $data[$column] ) ){
                 return $this->setResponse([
                     'code' => 500,
                     'title' => $column." is not set."
