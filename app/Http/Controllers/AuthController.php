@@ -6,12 +6,13 @@ use Avatar;
 use Storage;
 
 use Illuminate\Http\Request;
+use App\Http\Controllers\BaseController;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\User;
 use Illuminate\Support\Facades\Validator;
 
-class AuthController extends Controller
+class AuthController extends BaseController
 {
     // region register
 
@@ -38,9 +39,15 @@ class AuthController extends Controller
         $avatar = Avatar::create($user->name)->getImageObject()->encode('png');
         Storage::put('avatars/'.$user->id.'/avatar.png', (string) $avatar);
 
-        $success['token'] =  $user->createToken('Urbiquity')-> accessToken;
-        $success['name'] =  $user->name;
-        return response()->json(['success'=>$success], 200 );
+        return $this->absorb(
+            $this->setResponse([
+                'title' => 'Successfully registered.',
+                'meta' => [
+                    'name' => $user->name,
+                    'token' => $user->createToken('Urbiquity')-> accessToken
+                ]
+            ])
+        )->json();
 
     }
 
@@ -66,13 +73,19 @@ class AuthController extends Controller
         if ($request->remember_me)
             $token->expires_at = Carbon::now()->addWeeks(1);
         $token->save();
-        return response()->json([
-            'access_token' => $tokenResult->accessToken,
-            'token_type' => 'Bearer',
-            'expires_at' => Carbon::parse(
-                $tokenResult->token->expires_at
-            )->toDateTimeString()
-        ]);
+
+        return $this->absorb(
+            $this->setResponse([
+                'title' => 'Successfully logging in',
+                'meta' => [
+                    'token_type' => 'Bearer',
+                    'access_token' => $tokenResult->accessToken,
+                    'expires_at' => Carbon::parse(
+                        $tokenResult->token->expires_at
+                    )->toDateTimeString()
+                ]
+            ])
+        )->json();
     }
 
     // endregion login
@@ -82,9 +95,11 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $request->user()->token()->revoke();
-        return response()->json([
-            'message' => 'Successfully logged out'
-        ]);
+        return $this->absorb(
+           $this->setResponse([
+               'title' => 'Successfully logged out'
+           ])
+        )->json();
     }
 
     // endregion logout
@@ -94,7 +109,12 @@ class AuthController extends Controller
     public function user(Request $request)
     {
         $user = User::all();
-        return response()->json( $user );
+        return $this->absorb(
+            $this->setResponse([
+                'title' => 'Successfully retrieve user list',
+                'meta' => $user
+            ])
+        )->json();
     }
 
     // endregion details
