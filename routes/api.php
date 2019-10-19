@@ -25,10 +25,16 @@ Route::group([
         "prefix" => "auth"
     ], function () {
 
-        Route::post('login', 'Auth\UserController@login');
-        Route::post('register', 'Auth\UserController@register');
-        Route::group(['middleware' => 'auth:api'], function () {
-            Route::post('details', 'Auth\UserController@details');
+        Route::post('login', [ 'as' => 'login', 'uses' => 'AuthController@login']);
+        Route::post('signup', 'AuthController@signup');
+
+        Route::post('profile', 'AuthController@update_profile');
+
+        Route::group([
+            'middleware' => 'auth:api'
+        ], function() {
+            Route::get('logout', 'AuthController@logout');
+            Route::get('user', 'AuthController@user');
         });
 
     });
